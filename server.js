@@ -32,6 +32,7 @@ mongoose.connect(db).then(()=>{
 
 //post schema 
 const postSchema = new mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
     username: String,
     email: String,
     password: String,
@@ -39,15 +40,16 @@ const postSchema = new mongoose.Schema({
     number: String,
 })
 const savedata = mongoose.model("data", postSchema)
-
+ 
 // create request 
  app.post("/submit", (req, res)=>{
     const newdata = new savedata({
+        _id: req.body._id,
         username: req.body.username,
         email: req.body.email,
         password: req.body.password,
-        picture: req.body.picture,
-        number: req.body.number,
+        // picture: req.body.picture,
+        // number: req.body.number,
     })
     newdata.save().then(()=>{
         res.status(200).send("data stored")
@@ -66,7 +68,37 @@ const savedata = mongoose.model("data", postSchema)
         res.status(500).send(error)
     }
 })
-  
+
+//delete one
+  app.post("/deleteone", async (req, res)=>{
+    const id= req.body.id;
+    try{
+        const data= await savedata.deleteOne({_id:id})
+        res.json(data)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+  })
+
+
+  //edit request
+  app.put("/update", async(req, res)=>{
+    const id= req.body._id;
+    const {username, email, password} = req.body;
+    console.log(req.body);
+    const edit = {
+        username, email, password,
+    }
+    try{
+        const data= await savedata.updateOne({_id:id}, edit )
+        res.json(data)
+    } catch(error){
+        res.status(500).send(error)
+    }
+  })
+
+
+
 //get request
  app.get("/getdata" ,async (req, res)=>{
     try{
@@ -78,3 +110,8 @@ const savedata = mongoose.model("data", postSchema)
         res.status(500).send(error)
     }
  })
+
+
+ // Edit request
+
+  
